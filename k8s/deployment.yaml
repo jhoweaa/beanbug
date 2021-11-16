@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bugtest
+  labels:
+    app: bugtest
+spec:
+  selector:
+    matchLabels:
+      app: bugtest
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bugtest
+    spec:
+      containers:
+        - name: bugtest
+          image: localhost:5000/bugtest
+          imagePullPolicy: Always
+          env:
+            - name: MICRONAUT_CONFIG_FILES
+              value: "/conf/application.yaml"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: applicationconfigvolume
+              mountPath: /conf
+      volumes:
+        - name: applicationconfigvolume
+          configMap:
+            name: bugtest-config
+

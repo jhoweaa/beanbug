@@ -1,0 +1,63 @@
+plugins {
+    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("com.google.cloud.tools.jib") version "3.1.4"
+    id("io.micronaut.application") version "2.0.8"
+}
+
+version = "0.1"
+group = "com.bugtest"
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+micronaut {
+    runtime("netty")
+    testRuntime("junit5")
+    processing {
+        incremental(true)
+        annotations("com.bugtest.*")
+    }
+}
+
+dependencies {
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-runtime")
+    implementation("javax.annotation:javax.annotation-api")
+    implementation('io.micronaut:micronaut-tracing')
+    implementation('io.opentracing.brave:brave-opentracing:1.0.0')
+    runtimeOnly("ch.qos.logback:logback-classic")
+    implementation("io.micronaut:micronaut-validation")
+}
+
+application {
+    mainClass.set("com.bugtest.Application")
+}
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+}
+
+jib {
+    from {
+        image = 'eclipse-temurin:16-jdk-alpine'
+        //image = 'eclipse-temurin:17-jdk-alpine'
+        //image = 'localhost:5000/jre17:alpine3.14'
+        //image = 'localhost:5000/jre16:alpine3.14'
+    }
+    to {
+        image = "localhost:5000/bugtest"
+    }
+    container {
+        jvmFlags = ['-Dlogback.configurationFile=/conf/logback.xml']
+        ports = ['8080']
+        creationTime = "USE_CURRENT_TIMESTAMP"
+    }
+
+    allowInsecureRegistries = true
+}
+
